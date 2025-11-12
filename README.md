@@ -1,32 +1,46 @@
 # A Reproducible Rule-Based Baseline for Multi-Lane Highway Interaction: Integrating IDM, MOBIL, and Hysteretic Following
 
 ## Abstract
-This paper presents a reproducible and interpretable rule-based baseline for highway driving, designed to benchmark prediction-aware decision-making frameworks. The baseline combines the Intelligent Driver Model (IDM) for longitudinal control, the MOBIL criterion for lane-change decisions, and a quintic time-scaling profile for lateral motion generation. To eliminate oscillatory braking often caused by Time-to-Collision (TTC) triggers, a hysteretic car-following mechanism is introduced for the primary interacting vehicle (SV1). Specifically, SV1 performs an event-triggered acceleration when the ego vehicle (EV) initiates a lane change, and subsequently switches to a latching proportional–derivative (PD) following law that regulates spacing and relative velocity. The framework attributes vehicles undergoing lane changes to their target lanes for consistent safety evaluation and employs asynchronous longitudinal and lateral update cycles to mimic realistic driver behavior. The baseline provides a transparent reference for assessing the benefits of prediction-aware or optimization-based planning methods.
+The rule-based baseline provides a reproducible and interpretable reference for highway driving, designed to benchmark prediction-aware decision-making frameworks in Simulation Case~2. It integrates the Intelligent Driver Model (IDM) for longitudinal control, the MOBIL criterion for lane-change decisions, and a quintic time-scaling profile for lateral motion generation. To mitigate oscillatory braking behavior often induced by Time-to-Collision (TTC) triggers, a hysteretic car-following mechanism is incorporated for the primary interacting vehicle (SV1). Specifically, SV1 performs an event-triggered acceleration when the ego vehicle (EV) initiates a lane change, and subsequently switches to a latching proportional–derivative (PD) following law that regulates inter-vehicle spacing and relative velocity. The framework attributes vehicles undergoing lane changes to their target lanes for consistent safety evaluation and employs asynchronous longitudinal and lateral update cycles to emulate realistic driver behavior. Overall, this baseline serves as a transparent benchmark for assessing the performance differences between conventional rule-based approaches and the proposed HMDP–MPC decision-making framework.
+
+
+---
+## 1. Scenario Description
+
+The case considers a straight three-lane highway with lane centers located at *y = {4, 0, -4} m*.
+
+Five vehicles are involved: the ego vehicle (EV), initially driving in the middle lane and permitted to perform lane changes; an interactive surrounding vehicle (SV1) positioned in the left-rear region; a leading vehicle (SV2) ahead of the EV in the same lane; and two long trucks occupying the rightmost lane, which discourage merging maneuvers. 
+The EV is therefore restricted from entering the truck lane, focusing its decisions on interactions with SV1 and SV2 in the adjacent and current lanes.
 
 ---
 
-## 1. Introduction
-Highway decision-making requires balancing safety, efficiency, and comfort under interactive uncertainty. Prediction-aware frameworks (e.g., MPC, HMDPs) promise advantages, but these gains must be judged against transparent, reproducible reactive baselines. We integrate IDM (longitudinal), MOBIL (lane-change), and a quintic lateral trajectory, and add a hysteretic following mechanism to emulate human-like responses to cut-ins. The baseline is deterministic and interpretable.
+## 2. Methodology
 
----
+### Intelligent Driver Model (IDM)
 
-## 2. Problem Formulation
-We study a straight three-lane highway with lane centers \(y=\{4,0,-4\}\,\mathrm{m}\). Agents: EV (middle lane, allowed to change lanes), SV1 (left-rear, interactive), SV2 (front leader on EV lane), and two trucks on the right lane (long vehicles discouraging merges). EV is discouraged/restricted from the truck lane. Fixed initial conditions and update intervals; no randomness for replicability.
-
----
-
-## 3. Methodology
-
-### 3.1 Longitudinal Control via IDM
-Block equations (GitHub-friendly):
+The longitudinal acceleration `a_{x}` follows the classical IDM formulation:
 
 $$
-a = a_{\max}\!\left[\,1-\left(\frac{v}{v_0}\right)^{\delta}-\left(\frac{s^*}{s}\right)^2\right],
-\qquad
-s^* = s_0 + vT + \frac{v\,(v-v_\ell)}{2\sqrt{a_{\max} b_{\mathrm{comf}}}+\varepsilon}.
+a_x = a_0 \left[ 1 - \left(\frac{v}{v_0}\right)^{\delta}
+- \left(\frac{s^{*}(v,\Delta v)}{s}\right)^{2} \right],\quad
+s^{*} = s_0 + vT + \frac{v\,\Delta v}{2\sqrt{a_0 b}}
 $$
 
-Here \(v\) is speed, \(s\) net headway, \(v_\ell\) leader speed. Parameters \(s_0,T,a_{\max},b_{\mathrm{comf}},v_0\) denote minimum spacing, desired headway, maximum acceleration, comfortable deceleration, desired speed. We use forward-Euler integration with acceleration saturation.
+
+
+
+**Definitions**
+- `v`: ego vehicle speed
+- `Δv`: relative speed to the preceding vehicle
+- `s`: inter-vehicle gap
+
+**Parameters**
+- `a0`: maximum acceleration
+- `b`: comfortable deceleration
+- `v0`: desired speed
+- `T`: desired time headway
+- `s0`: minimum spacing
+
 
 ### 3.2 Lane-Change Decision via MOBIL
 EV evaluates adjacent lanes every decision tick:
