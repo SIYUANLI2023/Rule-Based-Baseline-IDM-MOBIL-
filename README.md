@@ -1,9 +1,7 @@
 # A Reproducible Rule-Based Baseline for Multi-Lane Highway Interaction
-**Integrating IDM, MOBIL, and Hysteretic Following**
 
-This repository provides a reproducible and interpretable rule-based baseline for highway driving, designed to benchmark prediction-aware decision-making frameworks (Simulation Case 2).  
-It integrates the Intelligent Driver Model (IDM) for longitudinal control, the MOBIL criterion for lane-change decisions, and a hysteretic proportional–derivative (PD) following mechanism for the primary interacting vehicle (SV1).  
-The baseline serves as a transparent reference for evaluating prediction-based frameworks such as HMDP–MPC decision-making models.  
+This repository provides a reproducible and interpretable rule-based baseline for highway driving, designed to compare the decision-making philosophy of conventional rule-based methods against the proposed prediction-aware framework (Simulation Case 2). It integrates the Intelligent Driver Model (IDM) for longitudinal control, the MOBIL criterion for lane-change decisions, and a quintic time-scaling profile for lateral motion generation. To mitigate oscillatory braking behavior often induced by Time-to-Collision (TTC) triggers, a hysteretic car-following mechanism is incorporated for the primary interacting vehicle (SV1). Specifically, SV1 performs an event-triggered acceleration when the ego vehicle (EV) initiates a lane change, and subsequently switches to a latching proportional–derivative (PD) following law that regulates inter-vehicle spacing and relative velocity. The framework attributes vehicles undergoing lane changes to their target lanes for consistent safety evaluation and employs asynchronous longitudinal and lateral update cycles to emulate realistic driver behavior. Overall, this baseline serves as a transparent benchmark for assessing the differences between conventional rule-based approaches and the proposed HMDP-MPC decision-making framework.
+
 Technical details are in **IDM-MOBIL.pdf**. Run `main.m` to reproduce all figures and results.
 
 ---
@@ -45,8 +43,7 @@ Technical details are in **IDM-MOBIL.pdf**. Run `main.m` to reproduce all figure
 ---
 
 ## 📚 Citation
-Siyuan Li, *“A Reproducible Rule-Based Baseline for Multi-Lane Highway Interaction: Integrating IDM, MOBIL, and Hysteretic Following,”*  
-Loughborough University, 2025.
+
 
 ---
 
